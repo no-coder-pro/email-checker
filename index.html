@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Checker Pro</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 25px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .input-section h2,
+        .results-section h2,
+        .results-section h3 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+            font-family: monospace;
+        }
+
+        .email-count {
+            text-align: right;
+            font-size: 12px;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .settings-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+        }
+
+        .checkbox-label input {
+            margin-right: 10px;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #38a169;
+            transform: translateY(-1px);
+        }
+
+        .progress-section {
+            text-align: center;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .summary-card.total { border-left: 4px solid #667eea; }
+        .summary-card.valid { border-left: 4px solid #48bb78; }
+        .summary-card.invalid { border-left: 4px solid #f56565; }
+        .summary-card.unknown { border-left: 4px solid #ed8936; }
+
+        .card-icon {
+            font-size: 2rem;
+            opacity: 0.8;
+        }
+
+        .total .card-icon { color: #667eea; }
+        .valid .card-icon { color: #48bb78; }
+        .invalid .card-icon { color: #f56565; }
+        .unknown .card-icon { color: #ed8936; }
+
+        .card-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .card-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 5px;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-header h3 {
+            margin-bottom: 0;
+        }
+
+        .results-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #718096;
+        }
+
+        .tab-btn.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .tab-btn:hover {
+            color: #667eea;
+        }
+
+        .results-table-container {
+            overflow-x: auto;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .results-table th {
+            background: #f7fafc;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .results-table tr:hover {
+            background: #f7fafc;
+        }
+
+        .status-valid { color: #48bb78; font-weight: 600; }
+        .status-invalid { color: #f56565; font-weight: 600; }
+        .status-unknown { color: #ed8936; font-weight: 600; }
+
+        .raw-response pre {
+            background: #1a202c;
+            color: #cbd5e0;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .settings-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .results-header {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+        }
+
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-envelope"></i> Gmail Checker Pro</h1>
+            <p>Verify Gmail addresses in bulk with real-time results</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card">
+                <h2><i class="fas fa-upload"></i> Input Emails</h2>
+                <div class="form-group">
+                    <label for="mails">Enter email addresses (one per line):</label>
+                    <textarea id="mails" placeholder="example1@gmail.com&#10;example2@gmail.com&#10;example3@gmail.com" rows="8"></textarea>
+                    <div class="email-count">0 emails entered</div>
+                </div>
+                
+                <div class="settings-row">
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            <input id="fastCheck" type="checkbox">
+                            <span class="checkmark"></span>
+                            Fast check mode
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cookie">Custom Cookie (optional):</label>
+                        <input id="cookie" type="text" placeholder="81e851c836e9be2f7f45a83131e7b3fe=42d2...; other=...">
+                    </div>
+                </div>
+                
+                <button id="go" class="btn-primary">
+                    <i class="fas fa-play"></i> Start Verification
+                </button>
+            </section>
+
+            <!-- Progress Section -->
+            <section id="progressSection" class="progress-section card hidden">
+                <h2><i class="fas fa-spinner"></i> Verification Progress</h2>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Initializing...</div>
+            </section>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card total">
+                        <div class="card-icon">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-value" id="totalEmails">0</div>
+                            <div class="card-label">Total Emails</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card valid">
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-value" id="validEmails">0</div>
+                            <div class="card-label">Valid</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card invalid">
+                        <div class="card-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-value" id="invalidEmails">0</div>
+                            <div class="card-label">Invalid</div>
+                        </div>
+                    </div>
+                    
+                    <div class="summary-card unknown">
+                        <div class="card-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-value" id="unknownEmails">0</div>
+                            <div class="card-label">Unknown</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Results -->
+                <div class="detailed-results card">
+                    <div class="results-header">
+                        <h3><i class="fas fa-list"></i> Detailed Results</h3>
+                        <button id="downloadBtn" class="btn-secondary">
+                            <i class="fas fa-download"></i> Download CSV
+                        </button>
+                    </div>
+                    
+                    <div class="results-tabs">
+                        <button class="tab-btn active" data-tab="all">All Results</button>
+                        <button class="tab-btn" data-tab="valid">Valid</button>
+                        <button class="tab-btn" data-tab="invalid">Invalid</button>
+                        <button class="tab-btn" data-tab="unknown">Unknown</button>
+                    </div>
+                    
+                    <div class="results-table-container">
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Email Address</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Raw API Response -->
+                <div class="raw-response card">
+                    <h3><i class="fas fa-code"></i> Raw API Response</h3>
+                    <pre id="rawResponse">{"message": "Results will appear here..."}</pre>
+                </div>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>&copy; 2024 Gmail Checker Pro. Built with Flask.</p>
+        </footer>
+    </div>
+
+    <script>
+        class GmailChecker {
+            constructor() {
+                this.currentResults = [];
+                this.initializeEventListeners();
+            }
+
+            initializeEventListeners() {
+                document.getElementById('go').addEventListener('click', () => this.startVerification());
+                document.getElementById('downloadBtn').addEventListener('click', () => this.downloadResults());
+                document.getElementById('mails').addEventListener('input', (e) => this.updateEmailCount(e));
+                
+                // Tab functionality
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.switchTab(e.target));
+                });
+            }
+
+            updateEmailCount(e) {
+                const emails = e.target.value.split('\n')
+                    .map(s => s.trim())
+                    .filter(s => s && s.includes('@'));
+                document.querySelector('.email-count').textContent = `${emails.length} emails entered`;
+            }
+
+            async startVerification() {
+                const mails = this.getEmailsFromInput();
+                const fastCheck = document.getElementById('fastCheck').checked;
+                const cookie = document.getElementById('cookie').value || null;
+
+                if (mails.length === 0) {
+                    this.showError('Please enter at least one email address.');
+                    return;
+                }
+
+                this.showProgress();
+                this.updateProgress(0, 'Initializing verification...');
+
+                try {
+                    const body = { mail: mails, fastCheck: fastCheck };
+                    if (cookie) body.cookie = cookie;
+
+                    const response = await fetch('/api/check', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Verification failed');
+                    }
+
+                    this.updateProgress(100, 'Verification complete!');
+                    setTimeout(() => {
+                        this.showResults(data);
+                    }, 500);
+
+                } catch (error) {
+                    this.updateProgress(0, 'Verification failed');
+                    this.showError('Error: ' + error.message);
+                }
+            }
+
+            getEmailsFromInput() {
+                return document.getElementById('mails').value
+                    .split('\n')
+                    .map(s => s.trim())
+                    .filter(s => s && s.includes('@'));
+            }
+
+            showProgress() {
+                document.getElementById('progressSection').classList.remove('hidden');
+                document.getElementById('resultsSection').classList.add('hidden');
+            }
+
+            updateProgress(percent, text) {
+                document.getElementById('progressFill').style.width = percent + '%';
+                document.getElementById('progressText').textContent = text;
+            }
+
+            showResults(data) {
+                this.currentResults = data.detailed_results || [];
+                
+                // Update summary cards
+                this.updateSummaryCards(data);
+                
+                // Update detailed results table
+                this.updateResultsTable('all');
+                
+                // Update raw response
+                document.getElementById('rawResponse').textContent = JSON.stringify(data, null, 2);
+                
+                // Show results section
+                document.getElementById('progressSection').classList.add('hidden');
+                document.getElementById('resultsSection').classList.remove('hidden');
+                
+                // Scroll to results
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            }
+
+            updateSummaryCards(data) {
+                const results = data.detailed_results || [];
+                const valid = results.filter(r => r.status && r.status.toString().toLowerCase().includes('valid')).length;
+                const invalid = results.filter(r => r.status && r.status.toString().toLowerCase().includes('invalid')).length;
+                const unknown = results.filter(r => !r.status || r.status.toString().toLowerCase().includes('unknown'));
+
+                document.getElementById('totalEmails').textContent = results.length;
+                document.getElementById('validEmails').textContent = valid;
+                document.getElementById('invalidEmails').textContent = invalid;
+                document.getElementById('unknownEmails').textContent = unknown.length;
+            }
+
+            updateResultsTable(filter = 'all') {
+                const tbody = document.getElementById('resultsTableBody');
+                tbody.innerHTML = '';
+
+                let filteredResults = this.currentResults;
+                
+                if (filter === 'valid') {
+                    filteredResults = this.currentResults.filter(r => 
+                        r.status && r.status.toString().toLowerCase().includes('valid')
+                    );
+                } else if (filter === 'invalid') {
+                    filteredResults = this.currentResults.filter(r => 
+                        r.status && r.status.toString().toLowerCase().includes('invalid')
+                    );
+                } else if (filter === 'unknown') {
+                    filteredResults = this.currentResults.filter(r => 
+                        !r.status || r.status.toString().toLowerCase().includes('unknown')
+                    );
+                }
+
+                filteredResults.forEach((result, index) => {
+                    const row = document.createElement('tr');
+                    const statusClass = this.getStatusClass(result.status);
+                    
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${this.escapeHtml(result.email)}</td>
+                        <td class="${statusClass}">${this.escapeHtml(result.status)}</td>
+                        <td>${this.formatTimestamp(result.timestamp)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Update active tab
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-tab="${filter}"]`).classList.add('active');
+            }
+
+            getStatusClass(status) {
+                if (!status) return 'status-unknown';
+                
+                const statusStr = status.toString().toLowerCase();
+                if (statusStr.includes('valid')) return 'status-valid';
+                if (statusStr.includes('invalid')) return 'status-invalid';
+                return 'status-unknown';
+            }
+
+            switchTab(clickedTab) {
+                const tab = clickedTab.getAttribute('data-tab');
+                this.updateResultsTable(tab);
+            }
+
+            async downloadResults() {
+                if (this.currentResults.length === 0) {
+                    this.showError('No results to download.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/download', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ results: this.currentResults })
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Download failed');
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `gmail_check_results_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                } catch (error) {
+                    this.showError('Download failed: ' + error.message);
+                }
+            }
+
+            showError(message) {
+                alert('Error: ' + message);
+            }
+
+            escapeHtml(unsafe) {
+                if (unsafe === null || unsafe === undefined) return '';
+                return unsafe.toString()
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            }
+
+            formatTimestamp(timestamp) {
+                if (!timestamp) return 'N/A';
+                try {
+                    const date = new Date(timestamp);
+                    return date.toLocaleString();
+                } catch {
+                    return timestamp;
+                }
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new GmailChecker();
+        });
+    </script>
+</body>
+</html>
